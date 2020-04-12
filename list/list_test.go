@@ -3,6 +3,7 @@ package list_test
 import (
 	"fmt"
 	. "github.com/victornm/go-dsa/list"
+	"reflect"
 	"testing"
 )
 
@@ -29,21 +30,24 @@ import (
 // _TODO: replace len() with l.Len()
 
 // _TODO: extract List interface, change these tests to test through the interface
-// TODO: implement LinkedList by passing all the tests here
-// TODO: benchmark to show different between LinkedList and ArrayList
+// _TODO: implement linkedList by passing all the tests here
+// TODO: benchmark to show different between linkedList and arrayList
 
 func TestNew(t *testing.T) {
-	l := NewArrayList()
+	for _, l := range []List{NewArrayList(), NewLinkedList()} {
+		t.Run(reflect.TypeOf(l).Elem().Name(), func(t *testing.T) {
+			if l.Len() != 0 || !l.IsEmpty() {
+				t.Error("new list should be empty")
+			}
 
-	if l.Len() != 0 || !l.IsEmpty() {
-		t.Error("new list should be empty")
+			l.Append(1)
+			assertEqual(t, 1, l.Len())
+			assertFalse(t, l.IsEmpty())
+		})
 	}
-
-	l.Append(1)
-	assertEqual(t, l.Len(), 1)
-	assertFalse(t, l.IsEmpty())
 }
 
+// _TODO: Test and implement this option for linkedList
 func TestNewWithInitialSlice(t *testing.T) {
 	tests := map[string]struct {
 		capacity int
@@ -77,9 +81,14 @@ func TestNewWithInitialSlice(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			l := NewArrayList(WithInitialCapacity(test.capacity), WithInitialSlice(test.slice))
-
-			assertSliceEqual(t, test.slice, toSlice(l))
+			for _, l := range []List{
+				NewArrayList(WithInitialCapacity(test.capacity), WithInitialSlice(test.slice)),
+				NewLinkedList(WithInitialSlice(test.slice)),
+			} {
+				t.Run(reflect.TypeOf(l).Elem().Name(), func(t *testing.T) {
+					assertSliceEqual(t, test.slice, toSlice(l))
+				})
+			}
 		})
 	}
 }
@@ -130,9 +139,12 @@ func TestAppend(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			l := NewArrayList()
-			test.f(l)
-			assertSliceEqual(t, test.wanted, toSlice(l))
+			for _, l := range []List{NewArrayList(), NewLinkedList()} {
+				t.Run(reflect.TypeOf(l).Elem().Name(), func(t *testing.T) {
+					test.f(l)
+					assertSliceEqual(t, test.wanted, toSlice(l))
+				})
+			}
 		})
 	}
 }
@@ -140,7 +152,7 @@ func TestAppend(t *testing.T) {
 func TestInsert(t *testing.T) {
 	tests := map[string]struct {
 		f      func(l List)
-		wanted []int // list state after perform f
+		wanted []int
 	}{
 		"insert to empty list at index 0": {
 			f: func(l List) {
@@ -177,9 +189,12 @@ func TestInsert(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			l := NewArrayList()
-			test.f(l)
-			assertSliceEqual(t, test.wanted, toSlice(l))
+			for _, l := range []List{NewArrayList(), NewLinkedList()} {
+				t.Run(reflect.TypeOf(l).Elem().Name(), func(t *testing.T) {
+					test.f(l)
+					assertSliceEqual(t, test.wanted, toSlice(l))
+				})
+			}
 		})
 	}
 }
@@ -187,7 +202,7 @@ func TestInsert(t *testing.T) {
 func TestReplace(t *testing.T) {
 	tests := map[string]struct {
 		f      func(l List)
-		wanted []int // list state after perform f
+		wanted []int
 	}{
 		"replace empty list": {
 			f: func(l List) {
@@ -233,9 +248,12 @@ func TestReplace(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			l := NewArrayList()
-			test.f(l)
-			assertSliceEqual(t, test.wanted, toSlice(l))
+			for _, l := range []List{NewArrayList(), NewLinkedList()} {
+				t.Run(reflect.TypeOf(l).Elem().Name(), func(t *testing.T) {
+					test.f(l)
+					assertSliceEqual(t, test.wanted, toSlice(l))
+				})
+			}
 		})
 	}
 }
@@ -302,9 +320,12 @@ func TestRemove(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			l := NewArrayList(WithInitialCapacity(1))
-			test.f(l)
-			assertSliceEqual(t, test.wanted, toSlice(l))
+			for _, l := range []List{NewArrayList(WithInitialCapacity(1)), NewLinkedList()} {
+				t.Run(reflect.TypeOf(l).Elem().Name(), func(t *testing.T) {
+					test.f(l)
+					assertSliceEqual(t, test.wanted, toSlice(l))
+				})
+			}
 		})
 	}
 }
@@ -381,16 +402,19 @@ func TestSearch(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			l := NewArrayList()
-			test.f(l)
+			for _, l := range []List{NewArrayList(WithInitialCapacity(1)), NewLinkedList()} {
+				t.Run(reflect.TypeOf(l).Elem().Name(), func(t *testing.T) {
+					test.f(l)
 
-			gotIdx, gotHas := l.Search(test.searchFor)
+					gotIdx, gotHas := l.Search(test.searchFor)
 
-			if test.wantedHas {
-				assertTrue(t, gotHas)
-				assertEqual(t, test.wantedIdx, gotIdx)
-			} else {
-				assertFalse(t, gotHas)
+					if test.wantedHas {
+						assertTrue(t, gotHas)
+						assertEqual(t, test.wantedIdx, gotIdx)
+					} else {
+						assertFalse(t, gotHas)
+					}
+				})
 			}
 		})
 	}
@@ -439,37 +463,42 @@ func TestGet(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			l := NewArrayList()
-			test.f(l)
+			for _, l := range []List{NewArrayList(), NewLinkedList()} {
+				t.Run(reflect.TypeOf(l).Elem().Name(), func(t *testing.T) {
+					test.f(l)
 
-			gotE, has := l.Get(test.getAt)
+					gotE, has := l.Get(test.getAt)
 
-			if test.wantedHas {
-				assertTrue(t, has)
-				assertEqual(t, test.wantedE, gotE)
-			} else {
-				assertFalse(t, has)
+					if test.wantedHas {
+						assertTrue(t, has)
+						assertEqual(t, test.wantedE, gotE)
+					} else {
+						assertFalse(t, has)
+					}
+				})
 			}
 		})
 	}
 }
 
 func TestTraverse(t *testing.T) {
-	l := NewArrayList()
+	for _, l := range []List{NewLinkedList(), NewLinkedList()} {
+		t.Run(reflect.TypeOf(l).Elem().Name(), func(t *testing.T) {
+			wanted := []int{0, 1, 2, 3}
 
-	wanted := []int{0, 1, 2, 3}
+			var got []int
 
-	var got []int
+			for _, e := range wanted {
+				l.Append(e)
+			}
 
-	for _, e := range wanted {
-		l.Append(e)
+			l.Traverse(func(e int) {
+				got = append(got, e)
+			})
+
+			assertSliceEqual(t, wanted, got)
+		})
 	}
-
-	l.Traverse(func(e int) {
-		got = append(got, e)
-	})
-
-	assertSliceEqual(t, wanted, got)
 }
 
 // toSlice return the slice presentation of List
@@ -477,10 +506,9 @@ func TestTraverse(t *testing.T) {
 func toSlice(l List) []int {
 	var slice []int
 
-	for i := 0; i < l.Len(); i++ {
-		e, _ := l.Get(i)
+	l.Traverse(func(e int) {
 		slice = append(slice, e)
-	}
+	})
 
 	return slice
 }
@@ -491,6 +519,7 @@ func assertTrue(t *testing.T, condition bool, msg ...string) {
 }
 
 func assertFalse(t *testing.T, condition bool, msg ...string) {
+	t.Helper()
 	assertCondition(t, false, condition, msg...)
 }
 
