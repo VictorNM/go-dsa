@@ -28,8 +28,12 @@ import (
 
 // _TODO: replace len() with l.Len()
 
+// _TODO: extract List interface, change these tests to test through the interface
+// TODO: implement LinkedList by passing all the tests here
+// TODO: benchmark to show different between LinkedList and ArrayList
+
 func TestNew(t *testing.T) {
-	l := New()
+	l := NewArrayList()
 
 	if l.Len() != 0 || !l.IsEmpty() {
 		t.Error("new list should be empty")
@@ -73,7 +77,7 @@ func TestNewWithInitialSlice(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			l := New(WithInitialCapacity(test.capacity), WithInitialSlice(test.slice))
+			l := NewArrayList(WithInitialCapacity(test.capacity), WithInitialSlice(test.slice))
 
 			assertSliceEqual(t, test.slice, toSlice(l))
 		})
@@ -82,18 +86,18 @@ func TestNewWithInitialSlice(t *testing.T) {
 
 func TestAppend(t *testing.T) {
 	tests := map[string]struct {
-		f      func(l *List)
+		f      func(l List)
 		wanted []int
 	}{
 		"append 1 time": {
-			func(l *List) {
+			func(l List) {
 				l.Append(1)
 			},
 			[]int{1},
 		},
 
 		"append 2 times": {
-			func(l *List) {
+			func(l List) {
 				l.Append(1)
 				l.Append(2)
 			},
@@ -101,21 +105,21 @@ func TestAppend(t *testing.T) {
 		},
 
 		"append multiple elements": {
-			f: func(l *List) {
+			f: func(l List) {
 				l.Append(1, 2, 3)
 			},
 			wanted: []int{1, 2, 3},
 		},
 
 		"append slice": {
-			f: func(l *List) {
+			f: func(l List) {
 				l.Append([]int{1, 2, 3}...)
 			},
 			wanted: []int{1, 2, 3},
 		},
 
 		"append nothing": {
-			f: func(l *List) {
+			f: func(l List) {
 				l.Append(1)
 				l.Append()
 			},
@@ -126,7 +130,7 @@ func TestAppend(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			l := New()
+			l := NewArrayList()
 			test.f(l)
 			assertSliceEqual(t, test.wanted, toSlice(l))
 		})
@@ -135,32 +139,32 @@ func TestAppend(t *testing.T) {
 
 func TestInsert(t *testing.T) {
 	tests := map[string]struct {
-		f      func(l *List)
+		f      func(l List)
 		wanted []int // list state after perform f
 	}{
 		"insert to empty list at index 0": {
-			f: func(l *List) {
+			f: func(l List) {
 				l.Insert(0, 1)
 			},
 			wanted: []int{1},
 		},
 
 		"insert at negative index should not successfully": {
-			f: func(l *List) {
+			f: func(l List) {
 				l.Insert(-1, 1)
 			},
 			wanted: nil,
 		},
 
 		"insert out of range should not successfully": {
-			f: func(l *List) {
+			f: func(l List) {
 				l.Insert(1, 2)
 			},
 			wanted: nil,
 		},
 
 		"insert many times": {
-			f: func(l *List) {
+			f: func(l List) {
 				l.Insert(0, 2)
 				l.Insert(0, 1)
 				l.Insert(1, 3)
@@ -173,7 +177,7 @@ func TestInsert(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			l := New()
+			l := NewArrayList()
 			test.f(l)
 			assertSliceEqual(t, test.wanted, toSlice(l))
 		})
@@ -182,18 +186,18 @@ func TestInsert(t *testing.T) {
 
 func TestReplace(t *testing.T) {
 	tests := map[string]struct {
-		f      func(l *List)
+		f      func(l List)
 		wanted []int // list state after perform f
 	}{
 		"replace empty list": {
-			f: func(l *List) {
+			f: func(l List) {
 				l.Replace(0, 1)
 			},
 			wanted: nil,
 		},
 
 		"replace list with 1 element": {
-			f: func(l *List) {
+			f: func(l List) {
 				l.Insert(0, 1)
 				l.Replace(0, 2)
 			},
@@ -201,7 +205,7 @@ func TestReplace(t *testing.T) {
 		},
 
 		"replace negative index": {
-			f: func(l *List) {
+			f: func(l List) {
 				l.Insert(0, 1)
 				l.Replace(-1, 1)
 			},
@@ -209,7 +213,7 @@ func TestReplace(t *testing.T) {
 		},
 
 		"replace out of range index": {
-			f: func(l *List) {
+			f: func(l List) {
 				l.Insert(0, 1)
 				l.Replace(1, 1)
 			},
@@ -217,7 +221,7 @@ func TestReplace(t *testing.T) {
 		},
 
 		"replace at middle element": {
-			f: func(l *List) {
+			f: func(l List) {
 				l.Insert(0, 0)
 				l.Insert(1, 1)
 				l.Insert(2, 2)
@@ -229,7 +233,7 @@ func TestReplace(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			l := New()
+			l := NewArrayList()
 			test.f(l)
 			assertSliceEqual(t, test.wanted, toSlice(l))
 		})
@@ -238,18 +242,18 @@ func TestReplace(t *testing.T) {
 
 func TestRemove(t *testing.T) {
 	tests := map[string]struct {
-		f      func(l *List)
+		f      func(l List)
 		wanted []int // list state after perform f
 	}{
 		"remove empty list": {
-			f: func(l *List) {
+			f: func(l List) {
 				l.Remove(0)
 			},
 			wanted: nil,
 		},
 
 		"append once then remove": {
-			f: func(l *List) {
+			f: func(l List) {
 				l.Append(1)
 				l.Remove(0)
 			},
@@ -257,7 +261,7 @@ func TestRemove(t *testing.T) {
 		},
 
 		"append once then remove out of range": {
-			f: func(l *List) {
+			f: func(l List) {
 				l.Append(0)
 				l.Remove(1)
 			},
@@ -265,7 +269,7 @@ func TestRemove(t *testing.T) {
 		},
 
 		"append twice then remove front": {
-			f: func(l *List) {
+			f: func(l List) {
 				l.Append(1)
 				l.Append(2)
 				l.Remove(0)
@@ -274,7 +278,7 @@ func TestRemove(t *testing.T) {
 		},
 
 		"append twice then remove back": {
-			f: func(l *List) {
+			f: func(l List) {
 				l.Append(1)
 				l.Append(2)
 				l.Remove(1)
@@ -283,7 +287,7 @@ func TestRemove(t *testing.T) {
 		},
 
 		"append 4 times then remove 3 times": {
-			f: func(l *List) {
+			f: func(l List) {
 				l.Append(1)
 				l.Append(2)
 				l.Append(3)
@@ -298,7 +302,7 @@ func TestRemove(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			l := New(WithInitialCapacity(1))
+			l := NewArrayList(WithInitialCapacity(1))
 			test.f(l)
 			assertSliceEqual(t, test.wanted, toSlice(l))
 		})
@@ -307,7 +311,7 @@ func TestRemove(t *testing.T) {
 
 func TestSearch(t *testing.T) {
 	tests := map[string]struct {
-		f func(l *List)
+		f func(l List)
 
 		searchFor int
 
@@ -315,13 +319,13 @@ func TestSearch(t *testing.T) {
 		wantedHas bool
 	}{
 		"empty slice": {
-			f:         func(l *List) {},
+			f:         func(l List) {},
 			searchFor: 10,
 			wantedHas: false,
 		},
 
 		"slice has 1 element": {
-			f: func(l *List) {
+			f: func(l List) {
 				l.Append(1)
 			},
 			searchFor: 1,
@@ -330,7 +334,7 @@ func TestSearch(t *testing.T) {
 		},
 
 		"slice = [2] after remove": {
-			f: func(l *List) {
+			f: func(l List) {
 				l.Append(1)
 				l.Append(2)
 				l.Remove(0)
@@ -341,7 +345,7 @@ func TestSearch(t *testing.T) {
 		},
 
 		"removed element should not be found": {
-			f: func(l *List) {
+			f: func(l List) {
 				l.Append(1)
 				l.Append(2)
 				l.Remove(1)
@@ -351,7 +355,7 @@ func TestSearch(t *testing.T) {
 		},
 
 		"search for element at the begin of slice": {
-			f: func(l *List) {
+			f: func(l List) {
 				l.Append(1)
 				l.Append(2)
 				l.Append(3)
@@ -363,7 +367,7 @@ func TestSearch(t *testing.T) {
 		},
 
 		"search for element at the end of slice": {
-			f: func(l *List) {
+			f: func(l List) {
 				l.Append(1)
 				l.Append(2)
 				l.Append(3)
@@ -377,7 +381,7 @@ func TestSearch(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			l := New()
+			l := NewArrayList()
 			test.f(l)
 
 			gotIdx, gotHas := l.Search(test.searchFor)
@@ -394,7 +398,7 @@ func TestSearch(t *testing.T) {
 
 func TestGet(t *testing.T) {
 	tests := map[string]struct {
-		f func(l *List)
+		f func(l List)
 
 		getAt int
 
@@ -402,13 +406,13 @@ func TestGet(t *testing.T) {
 		wantedHas bool
 	}{
 		"get empty slice": {
-			f:         func(l *List) {},
+			f:         func(l List) {},
 			getAt:     0,
 			wantedHas: false,
 		},
 
 		"append once then get at 0": {
-			f: func(l *List) {
+			f: func(l List) {
 				l.Append(1)
 			},
 			getAt:     0,
@@ -417,7 +421,7 @@ func TestGet(t *testing.T) {
 		},
 
 		"append once then get out of range": {
-			f: func(l *List) {
+			f: func(l List) {
 				l.Append(1)
 			},
 			getAt:     1,
@@ -425,7 +429,7 @@ func TestGet(t *testing.T) {
 		},
 
 		"get at negative index": {
-			f: func(l *List) {
+			f: func(l List) {
 				l.Append(1)
 			},
 			getAt:     -1,
@@ -435,7 +439,7 @@ func TestGet(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			l := New()
+			l := NewArrayList()
 			test.f(l)
 
 			gotE, has := l.Get(test.getAt)
@@ -451,7 +455,7 @@ func TestGet(t *testing.T) {
 }
 
 func TestTraverse(t *testing.T) {
-	l := New()
+	l := NewArrayList()
 
 	wanted := []int{0, 1, 2, 3}
 
@@ -470,7 +474,7 @@ func TestTraverse(t *testing.T) {
 
 // toSlice return the slice presentation of List
 // return a nil-slice if l.Len() == 0
-func toSlice(l *List) []int {
+func toSlice(l List) []int {
 	var slice []int
 
 	for i := 0; i < l.Len(); i++ {
