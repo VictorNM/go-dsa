@@ -31,7 +31,7 @@ import (
 
 // _TODO: extract List interface, change these tests to test through the interface
 // _TODO: implement linkedList by passing all the tests here
-// TODO: benchmark to show different between linkedList and arrayList
+// _TODO: benchmark to show different between linkedList and arrayList
 
 func TestNew(t *testing.T) {
 	for _, l := range []List{NewArrayList(), NewLinkedList()} {

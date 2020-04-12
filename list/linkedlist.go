@@ -19,9 +19,17 @@ func (l *linkedList) IsEmpty() bool {
 }
 
 func (l *linkedList) Append(elements ...int) {
-	for _, e := range elements {
-		l.appendOne(e)
+	otherL := newFromSlice(elements...)
+
+	if l.len == 0 {
+		l.head = otherL.head
+		l.len = otherL.len
+		return
 	}
+
+	p, _ := l.nodeAt(l.len - 1)
+	p.next = otherL.head
+	l.len += otherL.len
 }
 
 func (l *linkedList) Insert(idx int, e int) (ok bool) {
@@ -47,22 +55,6 @@ func (l *linkedList) Insert(idx int, e int) (ok bool) {
 		e:    e,
 	}
 	return true
-}
-
-func (l *linkedList) appendOne(e int) {
-	n := &node{
-		next: nil,
-		e:    e,
-	}
-
-	if l.head == nil {
-		l.head = n
-	} else {
-		p, _ := l.nodeAt(l.Len() - 1) // last node
-		p.next = n
-	}
-
-	l.len++
 }
 
 func (l *linkedList) Get(idx int) (e int, ok bool) {
@@ -148,14 +140,19 @@ func NewLinkedList(options ...Option) *linkedList {
 		o(c)
 	}
 
+	l := newFromSlice(c.initialSlice...)
+
+	return l
+}
+
+func newFromSlice(elements ...int) *linkedList {
 	l := &linkedList{
 		len:  0,
 		head: nil,
 	}
 
-	for i := len(c.initialSlice) - 1; i >= 0; i-- {
-		// insert from head is faster
-		l.Insert(0, c.initialSlice[i])
+	for i := len(elements) - 1; i >= 0; i-- {
+		l.Insert(0, elements[i]) // insert from head is faster
 	}
 
 	return l
