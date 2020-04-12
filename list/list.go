@@ -8,8 +8,10 @@ type List struct {
 }
 
 // Append the value e at the end of the list
-func (l *List) Append(e int) {
-	l.Insert(l.Len(), e)
+func (l *List) Append(elements ...int) {
+	l.ensureCapacity(l.Len() + len(elements))
+	copy(l.elements[l.Len():], elements)
+	l.len += len(elements)
 }
 
 // Insert the value e at index idx, shift all subsequence elements to the right
@@ -74,6 +76,15 @@ func (l *List) Get(idx int) (e int, ok bool) {
 	return l.elements[idx], true
 }
 
+func (l *List) Replace(idx int, e int) (ok bool) {
+	if l.outOfRange(idx) {
+		return false
+	}
+
+	l.elements[idx] = e
+	return true
+}
+
 // Traverse through the list and apply function f
 // Traverse not change the elements of the list
 func (l *List) Traverse(f func(e int)) {
@@ -116,7 +127,8 @@ func (l *List) pack() {
 }
 
 type config struct {
-	capacity int
+	capacity     int
+	initialSlice []int
 }
 
 type Option func(c *config)
@@ -128,18 +140,29 @@ func WithInitialCapacity(capacity int) Option {
 	}
 }
 
+// WithInitialSlice will construct a list with the given slice
+func WithInitialSlice(slice []int) Option {
+	return func(c *config) {
+		c.initialSlice = slice
+	}
+}
+
 // New return an array list
 func New(options ...Option) *List {
 	c := &config{
-		capacity: DefaultInitialCapacity,
+		capacity:     DefaultInitialCapacity,
+		initialSlice: nil,
 	}
 
 	for _, o := range options {
 		o(c)
 	}
 
-	return &List{
+	l := &List{
 		len:      0,
 		elements: make([]int, c.capacity),
 	}
+	l.Append(c.initialSlice...)
+
+	return l
 }

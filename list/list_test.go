@@ -6,6 +6,9 @@ import (
 	"testing"
 )
 
+// List of TODOs here illustrate the to-do list
+// in "Test-Driven Development By Example" - Kent Beck
+
 // Basic operations
 // _TODO: Construct a list, leaving it empty.
 // _TODO: Insert an element.
@@ -20,12 +23,10 @@ import (
 // Extended operations
 // _TODO: Empty or not.
 // _TODO: Size of the list.
-// TODO: Replace an element with another element.
-// TODO: Merge two ordered list.
-// TODO: Append an unordered list to another.
+// _TODO: Replace an element with another element.
+// _TODO: Append an unordered list to another.
 
-// _TODO: replace len() with l.Size()
-// _TODO: error if overflow
+// _TODO: replace len() with l.Len()
 
 func TestNew(t *testing.T) {
 	l := New()
@@ -37,6 +38,46 @@ func TestNew(t *testing.T) {
 	l.Append(1)
 	assertEqual(t, l.Len(), 1)
 	assertFalse(t, l.IsEmpty())
+}
+
+func TestNewWithInitialSlice(t *testing.T) {
+	tests := map[string]struct {
+		capacity int
+		slice    []int
+	}{
+		"cap > len(slice)": {
+			capacity: 5,
+			slice:    []int{1, 2, 3},
+		},
+
+		"cap < len(slice)": {
+			capacity: 5,
+			slice:    []int{1, 2, 3, 4, 5, 6, 7},
+		},
+
+		"cap == len(slice)": {
+			capacity: 5,
+			slice:    []int{1, 2, 3, 4, 5},
+		},
+
+		"nil slice": {
+			capacity: 5,
+			slice:    nil,
+		},
+
+		"empty slice": {
+			capacity: 5,
+			slice:    []int{},
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			l := New(WithInitialCapacity(test.capacity), WithInitialSlice(test.slice))
+
+			assertSliceEqual(t, test.slice, toSlice(l))
+		})
+	}
 }
 
 func TestAppend(t *testing.T) {
@@ -58,6 +99,29 @@ func TestAppend(t *testing.T) {
 			},
 			[]int{1, 2},
 		},
+
+		"append multiple elements": {
+			f: func(l *List) {
+				l.Append(1, 2, 3)
+			},
+			wanted: []int{1, 2, 3},
+		},
+
+		"append slice": {
+			f: func(l *List) {
+				l.Append([]int{1, 2, 3}...)
+			},
+			wanted: []int{1, 2, 3},
+		},
+
+		"append nothing": {
+			f: func(l *List) {
+				l.Append(1)
+				l.Append()
+			},
+
+			wanted: []int{1},
+		},
 	}
 
 	for name, test := range tests {
@@ -69,7 +133,7 @@ func TestAppend(t *testing.T) {
 	}
 }
 
-func TestInsertAt(t *testing.T) {
+func TestInsert(t *testing.T) {
 	tests := map[string]struct {
 		f      func(l *List)
 		wanted []int // list state after perform f
@@ -104,6 +168,62 @@ func TestInsertAt(t *testing.T) {
 				l.Insert(4, 1)
 			},
 			wanted: []int{1, 3, 4, 2, 1},
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			l := New()
+			test.f(l)
+			assertSliceEqual(t, test.wanted, toSlice(l))
+		})
+	}
+}
+
+func TestReplace(t *testing.T) {
+	tests := map[string]struct {
+		f      func(l *List)
+		wanted []int // list state after perform f
+	}{
+		"replace empty list": {
+			f: func(l *List) {
+				l.Replace(0, 1)
+			},
+			wanted: nil,
+		},
+
+		"replace list with 1 element": {
+			f: func(l *List) {
+				l.Insert(0, 1)
+				l.Replace(0, 2)
+			},
+			wanted: []int{2},
+		},
+
+		"replace negative index": {
+			f: func(l *List) {
+				l.Insert(0, 1)
+				l.Replace(-1, 1)
+			},
+			wanted: []int{1},
+		},
+
+		"replace out of range index": {
+			f: func(l *List) {
+				l.Insert(0, 1)
+				l.Replace(1, 1)
+			},
+			wanted: []int{1},
+		},
+
+		"replace at middle element": {
+			f: func(l *List) {
+				l.Insert(0, 0)
+				l.Insert(1, 1)
+				l.Insert(2, 2)
+				l.Replace(1, 3)
+			},
+			wanted: []int{0, 3, 2},
 		},
 	}
 
@@ -348,6 +468,8 @@ func TestTraverse(t *testing.T) {
 	assertSliceEqual(t, wanted, got)
 }
 
+// toSlice return the slice presentation of List
+// return a nil-slice if l.Len() == 0
 func toSlice(l *List) []int {
 	var slice []int
 
@@ -388,15 +510,11 @@ func assertEqual(t *testing.T, wanted, got int, msg ...string) {
 	}
 }
 
+// assertSliceEqual
+// note: for testing, nil-slice and empty slice are equal
 func assertSliceEqual(t *testing.T, wanted, got []int) {
 	t.Helper()
 	if len(wanted) != len(got) {
-		t.Errorf("wanted %v but got %v", wanted, got)
-		return
-	}
-
-	if (wanted == nil && got != nil) ||
-		(wanted != nil && got == nil) {
 		t.Errorf("wanted %v but got %v", wanted, got)
 		return
 	}
