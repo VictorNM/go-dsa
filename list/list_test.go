@@ -1,8 +1,8 @@
 package list_test
 
 import (
-	"fmt"
 	. "github.com/victornm/go-dsa/list"
+	"github.com/victornm/go-dsa/shared/assert"
 	"reflect"
 	"testing"
 )
@@ -41,8 +41,8 @@ func TestNew(t *testing.T) {
 			}
 
 			l.Append(1)
-			assertEqual(t, 1, l.Len())
-			assertFalse(t, l.IsEmpty())
+			assert.IntEqual(t, 1, l.Len())
+			assert.False(t, l.IsEmpty())
 		})
 	}
 }
@@ -86,7 +86,7 @@ func TestNewWithInitialSlice(t *testing.T) {
 				NewLinkedList(WithInitialSlice(test.slice)),
 			} {
 				t.Run(reflect.TypeOf(l).Elem().Name(), func(t *testing.T) {
-					assertSliceEqual(t, test.slice, toSlice(l))
+					assert.SliceIntEqual(t, test.slice, toSlice(l))
 				})
 			}
 		})
@@ -142,7 +142,7 @@ func TestAppend(t *testing.T) {
 			for _, l := range []List{NewArrayList(), NewLinkedList()} {
 				t.Run(reflect.TypeOf(l).Elem().Name(), func(t *testing.T) {
 					test.f(l)
-					assertSliceEqual(t, test.wanted, toSlice(l))
+					assert.SliceIntEqual(t, test.wanted, toSlice(l))
 				})
 			}
 		})
@@ -192,7 +192,7 @@ func TestInsert(t *testing.T) {
 			for _, l := range []List{NewArrayList(), NewLinkedList()} {
 				t.Run(reflect.TypeOf(l).Elem().Name(), func(t *testing.T) {
 					test.f(l)
-					assertSliceEqual(t, test.wanted, toSlice(l))
+					assert.SliceIntEqual(t, test.wanted, toSlice(l))
 				})
 			}
 		})
@@ -251,7 +251,7 @@ func TestReplace(t *testing.T) {
 			for _, l := range []List{NewArrayList(), NewLinkedList()} {
 				t.Run(reflect.TypeOf(l).Elem().Name(), func(t *testing.T) {
 					test.f(l)
-					assertSliceEqual(t, test.wanted, toSlice(l))
+					assert.SliceIntEqual(t, test.wanted, toSlice(l))
 				})
 			}
 		})
@@ -323,7 +323,7 @@ func TestRemove(t *testing.T) {
 			for _, l := range []List{NewArrayList(WithInitialCapacity(1)), NewLinkedList()} {
 				t.Run(reflect.TypeOf(l).Elem().Name(), func(t *testing.T) {
 					test.f(l)
-					assertSliceEqual(t, test.wanted, toSlice(l))
+					assert.SliceIntEqual(t, test.wanted, toSlice(l))
 				})
 			}
 		})
@@ -409,10 +409,10 @@ func TestSearch(t *testing.T) {
 					gotIdx, gotHas := l.Search(test.searchFor)
 
 					if test.wantedHas {
-						assertTrue(t, gotHas)
-						assertEqual(t, test.wantedIdx, gotIdx)
+						assert.True(t, gotHas)
+						assert.IntEqual(t, test.wantedIdx, gotIdx)
 					} else {
-						assertFalse(t, gotHas)
+						assert.False(t, gotHas)
 					}
 				})
 			}
@@ -470,10 +470,10 @@ func TestGet(t *testing.T) {
 					gotE, has := l.Get(test.getAt)
 
 					if test.wantedHas {
-						assertTrue(t, has)
-						assertEqual(t, test.wantedE, gotE)
+						assert.True(t, has)
+						assert.IntEqual(t, test.wantedE, gotE)
 					} else {
-						assertFalse(t, has)
+						assert.False(t, has)
 					}
 				})
 			}
@@ -496,7 +496,7 @@ func TestTraverse(t *testing.T) {
 				got = append(got, e)
 			})
 
-			assertSliceEqual(t, wanted, got)
+			assert.SliceIntEqual(t, wanted, got)
 		})
 	}
 }
@@ -511,48 +511,4 @@ func toSlice(l List) []int {
 	})
 
 	return slice
-}
-
-func assertTrue(t *testing.T, condition bool, msg ...string) {
-	t.Helper()
-	assertCondition(t, true, condition, msg...)
-}
-
-func assertFalse(t *testing.T, condition bool, msg ...string) {
-	t.Helper()
-	assertCondition(t, false, condition, msg...)
-}
-
-func assertCondition(t *testing.T, wanted, got bool, msg ...string) {
-	t.Helper()
-	if wanted != got {
-		if len(msg) == 0 {
-			msg = []string{fmt.Sprintf("should be %t", wanted)}
-		}
-		t.Errorf(msg[0])
-	}
-}
-
-func assertEqual(t *testing.T, wanted, got int, msg ...string) {
-	t.Helper()
-	if wanted != got {
-		if len(msg) == 0 {
-			msg = []string{fmt.Sprintf("wanted %d but got %d", wanted, got)}
-		}
-		t.Errorf(msg[0])
-	}
-}
-
-// assertSliceEqual
-// note: for testing, nil-slice and empty slice are equal
-func assertSliceEqual(t *testing.T, wanted, got []int) {
-	t.Helper()
-	if len(wanted) != len(got) {
-		t.Errorf("wanted %v but got %v", wanted, got)
-		return
-	}
-
-	for i := range wanted {
-		assertEqual(t, wanted[i], got[i], fmt.Sprintf("wanted %v but got %v", wanted, got))
-	}
 }
