@@ -5,20 +5,20 @@ type node struct {
 	e    int
 }
 
-type linkedList struct {
+type LinkedList struct {
 	head *node
 	len  int
 }
 
-func (l *linkedList) Len() int {
+func (l *LinkedList) Len() int {
 	return l.len
 }
 
-func (l *linkedList) IsEmpty() bool {
+func (l *LinkedList) IsEmpty() bool {
 	return l.Len() == 0
 }
 
-func (l *linkedList) Append(elements ...int) {
+func (l *LinkedList) Append(elements ...int) {
 	otherL := newFromSlice(elements...)
 
 	if l.len == 0 {
@@ -32,7 +32,7 @@ func (l *linkedList) Append(elements ...int) {
 	l.len += otherL.len
 }
 
-func (l *linkedList) Insert(idx int, e int) (ok bool) {
+func (l *LinkedList) Insert(idx int, e int) (ok bool) {
 	if l.outOfRange(idx) && idx != l.Len() {
 		return false
 	}
@@ -57,7 +57,7 @@ func (l *linkedList) Insert(idx int, e int) (ok bool) {
 	return true
 }
 
-func (l *linkedList) Get(idx int) (e int, ok bool) {
+func (l *LinkedList) Get(idx int) (e int, ok bool) {
 	p, ok := l.nodeAt(idx)
 	if !ok {
 		return 0, false
@@ -66,7 +66,7 @@ func (l *linkedList) Get(idx int) (e int, ok bool) {
 	return p.e, true
 }
 
-func (l *linkedList) Replace(idx int, e int) (ok bool) {
+func (l *LinkedList) Replace(idx int, e int) (ok bool) {
 	p, ok := l.nodeAt(idx)
 	if !ok {
 		return false
@@ -76,7 +76,7 @@ func (l *linkedList) Replace(idx int, e int) (ok bool) {
 	return true
 }
 
-func (l *linkedList) Remove(idx int) (ok bool) {
+func (l *LinkedList) Remove(idx int) (ok bool) {
 	if l.outOfRange(idx) {
 		return false
 	}
@@ -94,7 +94,7 @@ func (l *linkedList) Remove(idx int) (ok bool) {
 	return true
 }
 
-func (l *linkedList) nodeAt(idx int) (n *node, ok bool) {
+func (l *LinkedList) nodeAt(idx int) (n *node, ok bool) {
 	if l.outOfRange(idx) {
 		return nil, false
 	}
@@ -107,7 +107,7 @@ func (l *linkedList) nodeAt(idx int) (n *node, ok bool) {
 	return p, true
 }
 
-func (l *linkedList) Search(e int) (idx int, has bool) {
+func (l *LinkedList) Search(e int) (idx int, has bool) {
 	p := l.head
 	idx = 0
 	for p != nil {
@@ -121,7 +121,7 @@ func (l *linkedList) Search(e int) (idx int, has bool) {
 	return 0, false
 }
 
-func (l *linkedList) Traverse(f func(e int)) {
+func (l *LinkedList) Traverse(f func(e int)) {
 	p := l.head
 	for p != nil {
 		f(p.e)
@@ -129,11 +129,11 @@ func (l *linkedList) Traverse(f func(e int)) {
 	}
 }
 
-func (l *linkedList) outOfRange(idx int) bool {
+func (l *LinkedList) outOfRange(idx int) bool {
 	return idx < 0 || idx >= l.Len()
 }
 
-func NewLinkedList(options ...Option) *linkedList {
+func NewLinkedList(options ...Option) *LinkedList {
 	c := &config{initialSlice: nil}
 
 	for _, o := range options {
@@ -145,8 +145,8 @@ func NewLinkedList(options ...Option) *linkedList {
 	return l
 }
 
-func newFromSlice(elements ...int) *linkedList {
-	l := &linkedList{
+func newFromSlice(elements ...int) *LinkedList {
+	l := &LinkedList{
 		len:  0,
 		head: nil,
 	}

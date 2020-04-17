@@ -30,8 +30,8 @@ import (
 // _TODO: replace len() with l.Len()
 
 // _TODO: extract List interface, change these tests to test through the interface
-// _TODO: implement linkedList by passing all the tests here
-// _TODO: benchmark to show different between linkedList and arrayList
+// _TODO: implement LinkedList by passing all the tests here
+// _TODO: benchmark to show different between LinkedList and ArrayList
 
 func TestNew(t *testing.T) {
 	for _, l := range []List{NewArrayList(), NewLinkedList()} {
@@ -47,7 +47,7 @@ func TestNew(t *testing.T) {
 	}
 }
 
-// _TODO: Test and implement this option for linkedList
+// _TODO: Test and implement this option for LinkedList
 func TestNewWithInitialSlice(t *testing.T) {
 	tests := map[string]struct {
 		capacity int
