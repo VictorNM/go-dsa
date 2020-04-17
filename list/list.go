@@ -43,7 +43,7 @@ type config struct {
 type Option func(c *config)
 
 // WithInitialCapacity change the default initial capacity of the list
-// Only have affect for arrayList
+// Only have affect for ArrayList
 func WithInitialCapacity(capacity int) Option {
 	return func(c *config) {
 		c.capacity = capacity

@@ -2,19 +2,19 @@ package list
 
 const DefaultInitialCapacity = 10
 
-type arrayList struct {
+type ArrayList struct {
 	len      int
 	elements []int
 }
 
-func (l *arrayList) Append(elements ...int) {
+func (l *ArrayList) Append(elements ...int) {
 	l.ensureCapacity(l.Len() + len(elements))
 	copy(l.elements[l.Len():], elements)
 	l.len += len(elements)
 }
 
 // Insert shift all subsequence elements to the right then insert
-func (l *arrayList) Insert(idx int, e int) (ok bool) {
+func (l *ArrayList) Insert(idx int, e int) (ok bool) {
 	if l.outOfRange(idx) && idx != l.Len() {
 		return false
 	}
@@ -32,7 +32,7 @@ func (l *arrayList) Insert(idx int, e int) (ok bool) {
 }
 
 // Remove and shift all subsequence elements to the left
-func (l *arrayList) Remove(idx int) (ok bool) {
+func (l *ArrayList) Remove(idx int) (ok bool) {
 	if l.outOfRange(idx) {
 		return false
 	}
@@ -45,7 +45,7 @@ func (l *arrayList) Remove(idx int) (ok bool) {
 	return true
 }
 
-func (l *arrayList) Search(e int) (idx int, has bool) {
+func (l *ArrayList) Search(e int) (idx int, has bool) {
 	for i := 0; i < l.len; i++ {
 		if l.elements[i] == e {
 			return i, true
@@ -55,11 +55,11 @@ func (l *arrayList) Search(e int) (idx int, has bool) {
 	return 0, false
 }
 
-func (l *arrayList) Len() int {
+func (l *ArrayList) Len() int {
 	return l.len
 }
 
-func (l *arrayList) Get(idx int) (e int, ok bool) {
+func (l *ArrayList) Get(idx int) (e int, ok bool) {
 	if l.outOfRange(idx) {
 		return 0, false
 	}
@@ -67,7 +67,7 @@ func (l *arrayList) Get(idx int) (e int, ok bool) {
 	return l.elements[idx], true
 }
 
-func (l *arrayList) Replace(idx int, e int) (ok bool) {
+func (l *ArrayList) Replace(idx int, e int) (ok bool) {
 	if l.outOfRange(idx) {
 		return false
 	}
@@ -76,21 +76,21 @@ func (l *arrayList) Replace(idx int, e int) (ok bool) {
 	return true
 }
 
-func (l *arrayList) Traverse(f func(e int)) {
+func (l *ArrayList) Traverse(f func(e int)) {
 	for i := 0; i < l.len; i++ {
 		f(l.elements[i])
 	}
 }
 
-func (l *arrayList) IsEmpty() bool {
+func (l *ArrayList) IsEmpty() bool {
 	return l.Len() == 0
 }
 
-func (l *arrayList) outOfRange(idx int) bool {
+func (l *ArrayList) outOfRange(idx int) bool {
 	return idx < 0 || idx >= l.len
 }
 
-func (l *arrayList) ensureCapacity(minCapacity int) {
+func (l *ArrayList) ensureCapacity(minCapacity int) {
 	if minCapacity <= cap(l.elements) {
 		return
 	}
@@ -102,7 +102,7 @@ func (l *arrayList) ensureCapacity(minCapacity int) {
 	l.elements = newElements
 }
 
-func (l *arrayList) pack() {
+func (l *ArrayList) pack() {
 	if l.len > cap(l.elements)/2 {
 		return
 	}
@@ -115,7 +115,7 @@ func (l *arrayList) pack() {
 }
 
 // NewArrayList return an array list
-func NewArrayList(options ...Option) *arrayList {
+func NewArrayList(options ...Option) *ArrayList {
 	c := &config{
 		capacity:     DefaultInitialCapacity,
 		initialSlice: nil,
@@ -125,7 +125,7 @@ func NewArrayList(options ...Option) *arrayList {
 		o(c)
 	}
 
-	l := &arrayList{
+	l := &ArrayList{
 		len:      0,
 		elements: make([]int, c.capacity),
 	}
