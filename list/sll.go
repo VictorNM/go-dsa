@@ -1,24 +1,25 @@
 package list
 
-type node struct {
-	next *node
+type sllNode struct {
+	next *sllNode
 	e    int
 }
 
-type LinkedList struct {
-	head *node
+// SLL mean Singly Linked List
+type SLL struct {
+	head *sllNode
 	len  int
 }
 
-func (l *LinkedList) Len() int {
+func (l *SLL) Len() int {
 	return l.len
 }
 
-func (l *LinkedList) IsEmpty() bool {
+func (l *SLL) IsEmpty() bool {
 	return l.Len() == 0
 }
 
-func (l *LinkedList) Append(elements ...int) {
+func (l *SLL) Append(elements ...int) {
 	otherL := newFromSlice(elements...)
 
 	if l.len == 0 {
@@ -32,7 +33,7 @@ func (l *LinkedList) Append(elements ...int) {
 	l.len += otherL.len
 }
 
-func (l *LinkedList) Insert(idx int, e int) (ok bool) {
+func (l *SLL) Insert(idx int, e int) (ok bool) {
 	if l.outOfRange(idx) && idx != l.Len() {
 		return false
 	}
@@ -41,7 +42,7 @@ func (l *LinkedList) Insert(idx int, e int) (ok bool) {
 
 	// insert head
 	if idx == 0 {
-		l.head = &node{
+		l.head = &sllNode{
 			e:    e,
 			next: l.head,
 		}
@@ -50,14 +51,14 @@ func (l *LinkedList) Insert(idx int, e int) (ok bool) {
 
 	// insert middle and tail
 	p, _ := l.nodeAt(idx - 1) // 0 <= idx - 1 < l.Len()
-	p.next = &node{
+	p.next = &sllNode{
 		next: p.next,
 		e:    e,
 	}
 	return true
 }
 
-func (l *LinkedList) Get(idx int) (e int, ok bool) {
+func (l *SLL) Get(idx int) (e int, ok bool) {
 	p, ok := l.nodeAt(idx)
 	if !ok {
 		return 0, false
@@ -66,7 +67,7 @@ func (l *LinkedList) Get(idx int) (e int, ok bool) {
 	return p.e, true
 }
 
-func (l *LinkedList) Replace(idx int, e int) (ok bool) {
+func (l *SLL) Replace(idx int, e int) (ok bool) {
 	p, ok := l.nodeAt(idx)
 	if !ok {
 		return false
@@ -76,7 +77,7 @@ func (l *LinkedList) Replace(idx int, e int) (ok bool) {
 	return true
 }
 
-func (l *LinkedList) Remove(idx int) (ok bool) {
+func (l *SLL) Remove(idx int) (ok bool) {
 	if l.outOfRange(idx) {
 		return false
 	}
@@ -94,7 +95,7 @@ func (l *LinkedList) Remove(idx int) (ok bool) {
 	return true
 }
 
-func (l *LinkedList) nodeAt(idx int) (n *node, ok bool) {
+func (l *SLL) nodeAt(idx int) (n *sllNode, ok bool) {
 	if l.outOfRange(idx) {
 		return nil, false
 	}
@@ -107,7 +108,7 @@ func (l *LinkedList) nodeAt(idx int) (n *node, ok bool) {
 	return p, true
 }
 
-func (l *LinkedList) Search(e int) (idx int, has bool) {
+func (l *SLL) Search(e int) (idx int, has bool) {
 	p := l.head
 	idx = 0
 	for p != nil {
@@ -121,7 +122,7 @@ func (l *LinkedList) Search(e int) (idx int, has bool) {
 	return 0, false
 }
 
-func (l *LinkedList) Traverse(f func(e int)) {
+func (l *SLL) Traverse(f func(e int)) {
 	p := l.head
 	for p != nil {
 		f(p.e)
@@ -129,11 +130,11 @@ func (l *LinkedList) Traverse(f func(e int)) {
 	}
 }
 
-func (l *LinkedList) outOfRange(idx int) bool {
+func (l *SLL) outOfRange(idx int) bool {
 	return idx < 0 || idx >= l.Len()
 }
 
-func NewLinkedList(options ...Option) *LinkedList {
+func NewSLL(options ...Option) *SLL {
 	c := &config{initialSlice: nil}
 
 	for _, o := range options {
@@ -145,8 +146,8 @@ func NewLinkedList(options ...Option) *LinkedList {
 	return l
 }
 
-func newFromSlice(elements ...int) *LinkedList {
-	l := &LinkedList{
+func newFromSlice(elements ...int) *SLL {
+	l := &SLL{
 		len:  0,
 		head: nil,
 	}
