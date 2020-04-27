@@ -33,7 +33,7 @@ import (
 // _TODO: benchmark to show different between SLL and ArrayList
 
 // _TODO: implement SLL by passing all the tests here
-// TODO: benchmark to show different between DLL and SLL, ArrayList
+// _TODO: benchmark to show different between DLL and SLL, ArrayList
 
 type createListFunc func(options ...Option) List
 

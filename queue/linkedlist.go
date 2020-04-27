@@ -1,20 +1,11 @@
 package queue
 
-type node struct {
-	prev *node
-	next *node
-
-	e int
-}
-
-var _ Queue = &ListQueue{}
+import "github.com/victornm/go-dsa/list"
 
 type ListQueue struct {
-	front *node
-	rear  *node
+	l     *list.DLL
 
 	capacity int
-	size     int
 }
 
 // TODO: Enqueue(e int) (ok bool)
@@ -27,58 +18,32 @@ func (q *ListQueue) Enqueue(e int) (ok bool) {
 		return false
 	}
 
-	n := &node{
-		prev: q.rear,
-		next: nil,
-		e:    e,
-	}
-
-	if q.IsEmpty() {
-		q.front = n
-		q.rear = n
-		q.size++
-
-		return true
-	}
-
-	q.rear.next = n
-	q.rear = n
-	q.size++
+	q.l.Append(e)
 
 	return true
 }
 
 func (q *ListQueue) Dequeue() (e int, ok bool) {
-	if q.IsEmpty() {
+	e, ok = q.l.Get(0)
+	if !ok {
 		return 0, false
 	}
 
-	e = q.front.e
-	q.size--
-
-	q.front = q.front.next
+	q.l.Remove(0)
 
 	return e, true
 }
 
 func (q *ListQueue) Front() (e int, ok bool) {
-	if q.IsEmpty() {
-		return 0, false
-	}
-
-	return q.front.e, true
+	return q.l.Get(0)
 }
 
 func (q *ListQueue) Rear() (e int, ok bool) {
-	if q.IsEmpty() {
-		return 0, false
-	}
-
-	return q.rear.e, true
+	return q.l.Get(q.l.Len() - 1)
 }
 
 func (q *ListQueue) Size() int {
-	return q.size
+	return q.l.Len()
 }
 
 func (q *ListQueue) IsEmpty() bool {
@@ -96,6 +61,6 @@ func (q *ListQueue) IsFull() bool {
 func NewListQueue(capacity int) *ListQueue {
 	return &ListQueue{
 		capacity: capacity,
-		size:     0,
+		l: list.NewDLL(),
 	}
 }
