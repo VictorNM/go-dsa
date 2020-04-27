@@ -3,7 +3,6 @@ package list_test
 import (
 	. "github.com/victornm/go-dsa/list"
 	"github.com/victornm/go-dsa/shared/assert"
-	"reflect"
 	"testing"
 )
 
@@ -30,12 +29,33 @@ import (
 // _TODO: replace len() with l.Len()
 
 // _TODO: extract List interface, change these tests to test through the interface
-// _TODO: implement LinkedList by passing all the tests here
-// _TODO: benchmark to show different between LinkedList and ArrayList
+// _TODO: implement SLL by passing all the tests here
+// _TODO: benchmark to show different between SLL and ArrayList
+
+// _TODO: implement SLL by passing all the tests here
+// TODO: benchmark to show different between DLL and SLL, ArrayList
+
+type createListFunc func(options ...Option) List
+
+var createListFuncMap = map[string]createListFunc{
+	"ArrayList": func(options ...Option) List {
+		return NewArrayList(options...)
+	},
+
+	"SinglyLinkedList": func(options ...Option) List {
+		return NewSLL(options...)
+	},
+
+	"DoublyLinkedList": func(options ...Option) List {
+		return NewDLL(options...)
+	},
+}
 
 func TestNew(t *testing.T) {
-	for _, l := range []List{NewArrayList(), NewLinkedList()} {
-		t.Run(reflect.TypeOf(l).Elem().Name(), func(t *testing.T) {
+	for name, createListFunc := range createListFuncMap {
+		t.Run(name, func(t *testing.T) {
+			l := createListFunc()
+
 			if l.Len() != 0 || !l.IsEmpty() {
 				t.Error("new list should be empty")
 			}
@@ -47,7 +67,7 @@ func TestNew(t *testing.T) {
 	}
 }
 
-// _TODO: Test and implement this option for LinkedList
+// _TODO: Test and implement this option for SLL
 func TestNewWithInitialSlice(t *testing.T) {
 	tests := map[string]struct {
 		capacity int
@@ -79,13 +99,11 @@ func TestNewWithInitialSlice(t *testing.T) {
 		},
 	}
 
-	for name, test := range tests {
+	for name, createListFunc := range createListFuncMap {
 		t.Run(name, func(t *testing.T) {
-			for _, l := range []List{
-				NewArrayList(WithInitialCapacity(test.capacity), WithInitialSlice(test.slice)),
-				NewLinkedList(WithInitialSlice(test.slice)),
-			} {
-				t.Run(reflect.TypeOf(l).Elem().Name(), func(t *testing.T) {
+			for name, test := range tests {
+				t.Run(name, func(t *testing.T) {
+					l := createListFunc(WithInitialSlice(test.slice), WithInitialCapacity(test.capacity))
 					assert.SliceIntEqual(t, test.slice, toSlice(l))
 				})
 			}
@@ -137,10 +155,11 @@ func TestAppend(t *testing.T) {
 		},
 	}
 
-	for name, test := range tests {
+	for name, createListFunc := range createListFuncMap {
 		t.Run(name, func(t *testing.T) {
-			for _, l := range []List{NewArrayList(), NewLinkedList()} {
-				t.Run(reflect.TypeOf(l).Elem().Name(), func(t *testing.T) {
+			for name, test := range tests {
+				t.Run(name, func(t *testing.T) {
+					l := createListFunc()
 					test.f(l)
 					assert.SliceIntEqual(t, test.wanted, toSlice(l))
 				})
@@ -175,6 +194,31 @@ func TestInsert(t *testing.T) {
 			wanted: nil,
 		},
 
+		"insert head to list with 1 node": {
+			f: func(l List) {
+				l.Insert(0, 2)
+				l.Insert(0, 1)
+			},
+			wanted: []int{1, 2},
+		},
+
+		"insert tail to list with 1 node": {
+			f: func(l List) {
+				l.Insert(0, 1)
+				l.Insert(1, 2)
+			},
+			wanted: []int{1, 2},
+		},
+
+		"insert middle to list with 2 node": {
+			f: func(l List) {
+				l.Insert(0, 1)
+				l.Insert(1, 3)
+				l.Insert(1, 2)
+			},
+			wanted: []int{1, 2, 3},
+		},
+
 		"insert many times": {
 			f: func(l List) {
 				l.Insert(0, 2)
@@ -187,10 +231,11 @@ func TestInsert(t *testing.T) {
 		},
 	}
 
-	for name, test := range tests {
+	for name, createListFunc := range createListFuncMap {
 		t.Run(name, func(t *testing.T) {
-			for _, l := range []List{NewArrayList(), NewLinkedList()} {
-				t.Run(reflect.TypeOf(l).Elem().Name(), func(t *testing.T) {
+			for name, test := range tests {
+				t.Run(name, func(t *testing.T) {
+					l := createListFunc()
 					test.f(l)
 					assert.SliceIntEqual(t, test.wanted, toSlice(l))
 				})
@@ -246,10 +291,11 @@ func TestReplace(t *testing.T) {
 		},
 	}
 
-	for name, test := range tests {
+	for name, createListFunc := range createListFuncMap {
 		t.Run(name, func(t *testing.T) {
-			for _, l := range []List{NewArrayList(), NewLinkedList()} {
-				t.Run(reflect.TypeOf(l).Elem().Name(), func(t *testing.T) {
+			for name, test := range tests {
+				t.Run(name, func(t *testing.T) {
+					l := createListFunc()
 					test.f(l)
 					assert.SliceIntEqual(t, test.wanted, toSlice(l))
 				})
@@ -318,10 +364,11 @@ func TestRemove(t *testing.T) {
 		},
 	}
 
-	for name, test := range tests {
+	for name, createListFunc := range createListFuncMap {
 		t.Run(name, func(t *testing.T) {
-			for _, l := range []List{NewArrayList(WithInitialCapacity(1)), NewLinkedList()} {
-				t.Run(reflect.TypeOf(l).Elem().Name(), func(t *testing.T) {
+			for name, test := range tests {
+				t.Run(name, func(t *testing.T) {
+					l := createListFunc(WithInitialCapacity(1))
 					test.f(l)
 					assert.SliceIntEqual(t, test.wanted, toSlice(l))
 				})
@@ -400,10 +447,11 @@ func TestSearch(t *testing.T) {
 		},
 	}
 
-	for name, test := range tests {
+	for name, createListFunc := range createListFuncMap {
 		t.Run(name, func(t *testing.T) {
-			for _, l := range []List{NewArrayList(WithInitialCapacity(1)), NewLinkedList()} {
-				t.Run(reflect.TypeOf(l).Elem().Name(), func(t *testing.T) {
+			for name, test := range tests {
+				t.Run(name, func(t *testing.T) {
+					l := createListFunc()
 					test.f(l)
 
 					gotIdx, gotHas := l.Search(test.searchFor)
@@ -459,12 +507,38 @@ func TestGet(t *testing.T) {
 			getAt:     -1,
 			wantedHas: false,
 		},
+
+		"append 4 time then get at tail": {
+			f: func(l List) {
+				l.Append(1)
+				l.Append(2)
+				l.Append(3)
+				l.Append(4)
+			},
+			getAt:     3,
+			wantedHas: true,
+			wantedE:   4,
+		},
+
+		"append 5 times then get at node before tail": {
+			f: func(l List) {
+				l.Append(1)
+				l.Append(2)
+				l.Append(3)
+				l.Append(4)
+				l.Append(5)
+			},
+			getAt:     3,
+			wantedHas: true,
+			wantedE:   4,
+		},
 	}
 
-	for name, test := range tests {
+	for name, createListFunc := range createListFuncMap {
 		t.Run(name, func(t *testing.T) {
-			for _, l := range []List{NewArrayList(), NewLinkedList()} {
-				t.Run(reflect.TypeOf(l).Elem().Name(), func(t *testing.T) {
+			for name, test := range tests {
+				t.Run(name, func(t *testing.T) {
+					l := createListFunc()
 					test.f(l)
 
 					gotE, has := l.Get(test.getAt)
@@ -482,8 +556,9 @@ func TestGet(t *testing.T) {
 }
 
 func TestTraverse(t *testing.T) {
-	for _, l := range []List{NewLinkedList(), NewLinkedList()} {
-		t.Run(reflect.TypeOf(l).Elem().Name(), func(t *testing.T) {
+	for name, createListFunc := range createListFuncMap {
+		t.Run(name, func(t *testing.T) {
+			l := createListFunc()
 			wanted := []int{0, 1, 2, 3}
 
 			var got []int

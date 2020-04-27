@@ -3,9 +3,8 @@ package stack
 import "github.com/victornm/go-dsa/list"
 
 type linkedListStack struct {
-	Stack    // TODO: remove this embedded interface
 	capacity int
-	l        *list.LinkedList
+	l        *list.SLL
 }
 
 func NewListStack(capacity int) *linkedListStack {
@@ -15,7 +14,7 @@ func NewListStack(capacity int) *linkedListStack {
 
 	return &linkedListStack{
 		capacity: capacity,
-		l:        list.NewLinkedList(),
+		l:        list.NewSLL(),
 	}
 }
 
@@ -60,5 +59,6 @@ func (s *linkedListStack) IsFull() bool {
 }
 
 func (s *linkedListStack) Clear() {
-	for ok := true; ok; ok = s.l.Remove(0) {}
+	for ok := true; ok; ok = s.l.Remove(0) {
+	}
 }
