@@ -3,6 +3,4 @@
 ![Go](https://github.com/VictorNM/go-dsa/workflows/Go/badge.svg?branch=master)
 [![codecov](https://codecov.io/gh/VictorNM/go-dsa/branch/master/graph/badge.svg)](https://codecov.io/gh/VictorNM/go-dsa)
 
-Implement BKU DSA course with Golang. The project is try to be readable for students who more familiar with C++.
-
-Also try to apply some important aspects of Software Engineering like testing (TDD), OOP, clean code...  
+Project được thực hiện nhằm ôn tập lại kiến thức DSA. Ngoài ra còn hướng tới việc tạo ra tài liệu hướng dẫn cho các bạn sinh viên sau này. Chính vì vậy, project có xu hướng sử dụng các syntax dễ hiểu, tương đồng với C++.
